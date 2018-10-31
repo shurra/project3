@@ -1,0 +1,75 @@
+{% extends "orders/layout.html" %}
+
+{% block title %}
+    Menu
+{% endblock %}
+
+{% block content %}
+    <h1>Our menu</h1>
+    {% for category in categories %}
+        <div class="mb-5"><h2 class="text-center">{{ category.name }}</h2>
+            {% if "Pizza" in category.name  %}
+                <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                    <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
+                    {% for product in category.products %}
+                        <tr>
+                            <td class="text-center">{{ product.get_toppings_num_display }}</td><td class="text-center">{{ product.small_price }}</td><td class="text-center">{{ product.large_price }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        </div>
+
+        {% if "Toppings" in category.name %}
+            <table class="col-sm-12">
+                {% for product in category.products %}
+                    <tr><td class="text-center">{{ product.name }}</td></tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        {% if "Subs" in category.name %}
+            <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
+                {% for product in category.products %}
+                    <tr>
+                        <td class="text-center">{{ product.name }}</td><td class="text-center">{{ product.small_price }}</td><td class="text-center">{{ product.large_price }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        {% if "Pasta" in category.name %}
+            <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                {% for product in category.products %}
+                    <tr>
+                        <td class="text-center">{{ product.name }}</td><td class="text-center">{{ product.price }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        {% if "Salads" in category.name %}
+            <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                {% for product in category.products %}
+                    <tr>
+                        <td class="text-center">{{ product.name }}</td><td class="text-center">{{ product.price }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        {% if "Dinner Platters" in category.name %}
+            <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
+                {% for product in category.products %}
+                    <tr>
+                        <td class="text-center">{{ product.name }}</td><td class="text-center">{{ product.small_price }}</td><td class="text-center">{{ product.large_price }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+    {% endfor %}
+    <p>{{ categories}} </p>
+{% endblock %}
