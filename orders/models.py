@@ -1,8 +1,20 @@
 from djmoney.models.fields import MoneyField
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
+# class UserProfile(models.Model):
+#     # This field is required.
+#     user = models.OneToOneField(User)
+#     first_name
+#     last_name
+#     email
+#     last_login
+#     date_joined
+#
+#     def __unicode__(self):
+#         return self.user.username
 
 class Category(models.Model):
     name = models.CharField(max_length=64)
