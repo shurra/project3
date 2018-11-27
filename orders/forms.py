@@ -34,7 +34,7 @@ class PizzaForm(forms.Form):
     toppings = forms.ModelMultipleChoiceField(queryset=pizza_toppings,
                                               required=False,
                                               widget=forms.CheckboxSelectMultiple)
-    quantity = forms.IntegerField(required=True, initial=1, min_value=1)
+    quantity = forms.IntegerField(required=True, initial=1, min_value=1, max_value=10)
     prefix = "pizza"
 
     def clean_toppings(self):
@@ -56,21 +56,21 @@ class SubForm(forms.Form):
     addition = forms.ModelMultipleChoiceField(queryset=subs_additions,
                                               required=False,
                                               widget=forms.CheckboxSelectMultiple)
-    quantity = forms.IntegerField(required=True, initial=1, min_value=1)
+    quantity = forms.IntegerField(required=True, initial=1, min_value=1, max_value=10)
     prefix = "sub"
 
 
 class PastaForm(forms.Form):
     pastas = Pasta.objects.all()
     name = forms.ModelChoiceField(queryset=pastas, required=True)
-    quantity = forms.IntegerField(required=True, initial=1, min_value=1)
+    quantity = forms.IntegerField(required=True, initial=1, min_value=1, max_value=10)
     prefix = "pasta"
 
 
 class SaladForm(forms.Form):
     salads = Salad.objects.all()
     name = forms.ModelChoiceField(queryset=salads, required=True)
-    quantity = forms.IntegerField(required=True, initial=1, min_value=1)
+    quantity = forms.IntegerField(required=True, initial=1, min_value=1, max_value=10)
     prefix = "salad"
 
 
@@ -81,7 +81,7 @@ class DinnerPlatterForm(forms.Form):
              ('2', 'Large'),
              )
     size = forms.ChoiceField(required=True, choices=SIZES, )
-    quantity = forms.IntegerField(required=True, initial=1, min_value=1)
+    quantity = forms.IntegerField(required=True, initial=1, min_value=1, max_value=10)
     prefix = "dinner_platter"
 
 
