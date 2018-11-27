@@ -1,0 +1,32 @@
+{% extends "orders/layout.html" %}
+
+{% block title %}
+    Order detail
+{% endblock %}
+
+{% block content %}
+    <h2>Order detail</h2>
+    Order total: ${{ order.total }}.
+    {% if order.done %}
+        <span class="alert alert-success">Order status: done</span>
+    {% else %}
+        <div class="alert alert-warning">Order status: in progress
+            {% if user.is_staff %}
+                <form action="{% url 'order-done' %}" method="post">
+                    {% csrf_token %}
+                    {% include "orders/form_snippet.html" with form=form %}
+                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                    <input type="submit" value="Submit">
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
+
+
+    <h3>Order items:</h3>
+    <ul>
+        {% for item in order.orderitem_set.all %}
+            <li>{{ item.name }} costs ${{ item.price }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

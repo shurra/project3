@@ -1,0 +1,14 @@
+{% extends "orders/layout.html" %}
+
+{% block title %}
+    Pizza Form
+{% endblock %}
+
+{% block content %}
+    {#For reusable template#}
+    <form action="/collect_pizza/" method="post">
+    {% csrf_token %}
+        {% include "orders/form_snippet.html" with form=form %}
+        <input type="submit" value="Submit">
+    </form>
+{% endblock %}

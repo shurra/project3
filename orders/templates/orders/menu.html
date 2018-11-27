@@ -5,70 +5,254 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Our menu</h1>
-    {% for category in categories %}
-        <div class="mb-5"><h2 class="text-center">{{ category.name }}</h2>
-            {% if "Pizza" in category.name  %}
-                <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
-                    <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
-                    {% for product in category.products %}
-                        <tr>
-                            <td class="text-center">{{ product.get_toppings_num_display }}</td><td class="text-center">{{ product.small_price }}</td><td class="text-center">{{ product.large_price }}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% endif %}
+
+    <div class="row">
+        <div id="menu_view" {% if user.is_authenticated %} class="col-md-6" {% else %} class="col-md-12" {% endif %}>
+            <h1>Our menu</h1>
+            {% for cat in cats %}
+                <div class="mb-5"><h2 class="text-center">{{ cat.name }}</h2>
+                    {% if "Pizza" in cat.name %}
+                        <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                            <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
+                            {% for pizza in cat.pizzas.all %}
+                                <tr>
+                                    <td class="text-center">{{ pizza.get_toppings_num_display }}</td><td class="text-center">{{ pizza.small_price }}</td><td class="text-center">{{ pizza.large_price }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        {% if user.is_authenticated %}
+                            <!-- Trigger the modal with a button -->
+                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#pizzaModal">Buy pizza</button>
+                        {% endif %}
+                    {% endif %}
+                    {% if "Toppings" in cat.name %}
+                        <table class="col-sm-12">
+                            {% for topping in cat.pizzatopping_set.all %}
+                                <tr><td class="text-center">{{ topping.name }}</td></tr>
+                            {% endfor %}
+                        </table>
+                    {% endif %}
+                    {% if "Subs" in cat.name %}
+                        <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                            <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
+                            {% for sub in cat.sub_set.all %}
+                                <tr>
+                                    <td class="text-center">{{ sub.name }}</td><td class="text-center">{{ sub.small_price|default:"-" }}</td><td class="text-center">{{ sub.large_price }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        {% if user.is_authenticated %}
+                            <!-- Trigger the modal with a button -->
+                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#subModal">Buy sub</button>
+                        {% endif %}
+                    {% endif %}
+                    {% if "Pasta" in cat.name %}
+                        <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                            {% for pasta in cat.pasta_set.all %}
+                                <tr>
+                                    <td class="text-center">{{ pasta.name }}</td><td class="text-center">{{ pasta.price }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        {% if user.is_authenticated %}
+                            <!-- Trigger the modal with a button -->
+                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#pastaModal">Buy pasta</button>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if "Salads" in cat.name %}
+                        <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                            {% for salad in cat.salad_set.all %}
+                                <tr>
+                                    <td class="text-center">{{ salad.name }}</td><td class="text-center">{{ salad.price }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        {% if user.is_authenticated %}
+                            <!-- Trigger the modal with a button -->
+                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#saladModal">Buy salad</button>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if "Dinner Platters" in cat.name %}
+                        <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
+                            <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
+                            {% for product in cat.dinnerplatter_set.all %}
+                                <tr>
+                                    <td class="text-center">{{ product.name }}</td><td class="text-center">{{ product.small_price }}</td><td class="text-center">{{ product.large_price }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        {% if user.is_authenticated %}
+                            <!-- Trigger the modal with a button -->
+                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#dinner_platterModal">Buy dinner platter</button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endfor %}
         </div>
-
-        {% if "Toppings" in category.name %}
-            <table class="col-sm-12">
-                {% for product in category.products %}
-                    <tr><td class="text-center">{{ product.name }}</td></tr>
-                {% endfor %}
-            </table>
+        {% if user.is_authenticated and request.session.cart_items %}
+            <div class="col-md-6" style="background-color: darkseagreen">
+                <div id="cart" class="sticky-top">
+                    <h2>Shopping cart</h2>
+                    {% if request.session.cart_total and request.session.cart_total != "0" %}
+                        <a class="btn btn-primary" href="{% url 'submit_order' %}" role="button">Pay ${{ request.session.cart_total }}</a>
+                    {% endif %}
+                    {% for item in request.session.cart_items %}
+                        <div class="card my-1">
+                            <div class="card-body">
+                                <a class="close" aria-label="Remove from cart" href="{% url 'remove_from_card' %}?cart_item_id={{ item.cart_item_id }}">
+                                    <span aria-hidden="true">&times;</span>
+                                </a>
+                                <h5 class="card-title">{{ item.size }} {{ item.name }}</h5>
+                                {% if item.toppings %}
+                                    <p class="card-text"><b>Toppings: </b>
+                                        {{ item.toppings|join:", " }}
+                                    </p>
+                                {% endif %}
+                                {% if item.additions %}
+                                    <p class="card-text"><b>Additions: </b>
+                                        {{ item.additions|join:", " }}
+                                    </p>
+                                {% endif %}
+                                {% if item.extra_cheese %}
+                                    <p class="card-text"><b>Extra Cheese </b></p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <span>${{ item.price }}</span>
+                                {% if item.quantity > 1 %}
+                                    <span> * {{ item.quantity }} = ${{ item.total }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% if request.session.cart_total and request.session.cart_total != "0" %}
+                        <a class="btn btn-primary" href="{% url 'submit_order' %}" role="button">Pay ${{ request.session.cart_total }}</a>
+                    {% endif %}
+                </div>
+            </div>
         {% endif %}
+    </div>
 
-        {% if "Subs" in category.name %}
-            <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
-                <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
-                {% for product in category.products %}
-                    <tr>
-                        <td class="text-center">{{ product.name }}</td><td class="text-center">{{ product.small_price }}</td><td class="text-center">{{ product.large_price }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
+    <!-- Modal -->
+    <div id="pizzaModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'collect_pizza' %}" method="post">
+                        {% csrf_token %}
+                        {% include "orders/form_snippet.html" with form=pizza_form %}
+                        <input type="submit" value="Submit">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $("input[name='pizza-toppings']").change(function () {
+                var maxAllowed = 5;
+                var cnt = $("input[name='pizza-toppings']:checked").length;
+                if (cnt > maxAllowed)
+                {
+                    $(this).prop("checked", "");
+                    alert('Select maximum ' + maxAllowed + ' toppings!');
+                }
+            });
+        });
+    </script>
 
-        {% if "Pasta" in category.name %}
-            <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
-                {% for product in category.products %}
-                    <tr>
-                        <td class="text-center">{{ product.name }}</td><td class="text-center">{{ product.price }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-        {% if "Salads" in category.name %}
-            <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
-                {% for product in category.products %}
-                    <tr>
-                        <td class="text-center">{{ product.name }}</td><td class="text-center">{{ product.price }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-        {% if "Dinner Platters" in category.name %}
-            <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
-                <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
-                {% for product in category.products %}
-                    <tr>
-                        <td class="text-center">{{ product.name }}</td><td class="text-center">{{ product.small_price }}</td><td class="text-center">{{ product.large_price }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-    {% endfor %}
+    <div id="subModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'collect_sub' %}" method="post">
+                        {% csrf_token %}
+                        {% include "orders/form_snippet.html" with form=sub_form %}
+                        <input type="submit" value="Submit">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="pastaModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'collect_pasta' %}" method="post">
+                        {% csrf_token %}
+                        {% include "orders/form_snippet.html" with form=pasta_form %}
+                        <input type="submit" value="Submit">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="saladModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'collect_salad' %}" method="post">
+                        {% csrf_token %}
+                        {% include "orders/form_snippet.html" with form=salad_form %}
+                        <input type="submit" value="Submit">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="dinner_platterModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'collect_dinner_platter' %}" method="post">
+                        {% csrf_token %}
+                        {% include "orders/form_snippet.html" with form=dinner_platter_form %}
+                        <input type="submit" value="Submit">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

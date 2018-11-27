@@ -1,0 +1,38 @@
+{% extends "orders/layout.html" %}
+
+{% block title %}
+    Orders
+{% endblock %}
+
+{% block content %}
+    <h2>Orders list</h2>
+    {% if user.is_authenticated %}
+        <ul>
+            {% if user.is_staff %}
+                {% for order in object_list %}
+                    <li class="alert {% if order.done %}alert-success{% else %}alert-warning{% endif %}">
+                        <a href="{% url 'order-detail' order.id %}">
+                            {% if order.done %}Done.<br>{% else %}In progress.<br>{% endif %}
+                            Ordered on: {{ order.created_on|time:"H:i" }} {{ order.created_on|date:"D d M Y" }}. Price: {{ order.total }}<br>
+
+                        </a>
+                    User: {% firstof order.created_by.get_full_name order.created_by.username %}. Email: {{ order.created_by.email }}
+                    </li>
+                {% endfor %}
+            {% else %}
+                {% for order in object_list %}
+                    <li class="alert {% if order.done %}alert-success{% else %}alert-warning{% endif %}">
+                        <a href="{% url 'order-detail' order.id %}">
+                            {% if order.done %}Done.<br>
+                            {% else %}In progress.<br>
+                            {% endif %}
+                            Date: {{ order.created_on }}. Price: {{ order.total }}
+                        </a>
+                    </li>
+                {% endfor %}
+            {% endif %}
+        </ul>
+    {% else %}
+        <h2>Please <a href="{% url 'login' %}">login</a> to view orders.</h2>
+    {% endif %}
+{% endblock %}
