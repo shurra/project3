@@ -1,4 +1,5 @@
 {% extends "orders/layout.html" %}
+{% load bootstrap4 %}
 
 {% block title %}
     Menu
@@ -7,7 +8,7 @@
 {% block content %}
 
     <div class="row">
-        <div id="menu_view" {% if user.is_authenticated %} class="col-md-6" {% else %} class="col-md-12" {% endif %}>
+        <div id="menu_view" {% if request.session.cart_items|length > 0 %} class="col-md-6" {% else %} class="col-md-12" {% endif %}>
             <h1>Our menu</h1>
             {% for cat in cats %}
                 <div class="mb-5"><h2 class="text-center">{{ cat.name }}</h2>
@@ -91,7 +92,7 @@
                 </div>
             {% endfor %}
         </div>
-        {% if user.is_authenticated and request.session.cart_items %}
+        {% if user.is_authenticated and request.session.cart_items|length > 0 %}
             <div class="col-md-6" style="background-color: darkseagreen">
                 <div id="cart" class="sticky-top">
                     <h2>Shopping cart</h2>
@@ -141,14 +142,35 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
+                    <h4 class="modal-title">Select Pizza with 5 max toppings</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Modal Header</h4>
                 </div>
                 <div class="modal-body">
                     <form action="{% url 'collect_pizza' %}" method="post">
                         {% csrf_token %}
                         {% include "orders/form_snippet.html" with form=pizza_form %}
-                        <input type="submit" value="Submit">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="subModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Select sub</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'collect_sub' %}" method="post">
+                        {% csrf_token %}
+                        {% include "orders/form_snippet.html" with form=sub_form %}
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -158,53 +180,20 @@
         </div>
     </div>
     <script>
-        $(document).ready(function () {
-            $("input[name='pizza-toppings']").change(function () {
-                var maxAllowed = 5;
-                var cnt = $("input[name='pizza-toppings']:checked").length;
-                if (cnt > maxAllowed)
-                {
-                    $(this).prop("checked", "");
-                    alert('Select maximum ' + maxAllowed + ' toppings!');
-                }
-            });
-        });
-    </script>
 
-    <div id="subModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Modal Header</h4>
-                </div>
-                <div class="modal-body">
-                    <form action="{% url 'collect_sub' %}" method="post">
-                        {% csrf_token %}
-                        {% include "orders/form_snippet.html" with form=sub_form %}
-                        <input type="submit" value="Submit">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </script>
     <div id="pastaModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
+                    <h4 class="modal-title">Select pasta</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Modal Header</h4>
                 </div>
                 <div class="modal-body">
                     <form action="{% url 'collect_pasta' %}" method="post">
                         {% csrf_token %}
                         {% include "orders/form_snippet.html" with form=pasta_form %}
-                        <input type="submit" value="Submit">
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -218,14 +207,13 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
+                    <h4 class="modal-title">Select salad</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Modal Header</h4>
                 </div>
                 <div class="modal-body">
                     <form action="{% url 'collect_salad' %}" method="post">
                         {% csrf_token %}
                         {% include "orders/form_snippet.html" with form=salad_form %}
-                        <input type="submit" value="Submit">
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -239,14 +227,13 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
+                    <h4 class="modal-title">Select dinner platter</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Modal Header</h4>
                 </div>
                 <div class="modal-body">
                     <form action="{% url 'collect_dinner_platter' %}" method="post">
                         {% csrf_token %}
                         {% include "orders/form_snippet.html" with form=dinner_platter_form %}
-                        <input type="submit" value="Submit">
                     </form>
                 </div>
                 <div class="modal-footer">

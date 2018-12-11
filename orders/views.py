@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.views.generic.detail import SingleObjectMixin
 
-from .models import Category, PizzaTopping, Pizza, Sub, Pasta, Salad, DinnerPlatter, Order, OrderItem, SubsAddition
+from .models import Category, PizzaTopping, Pizza, Sub, Pasta, Salad, DinnerPlatter, Order, OrderItem, SubsAddition, UserSession
 
 from .forms import RegisterForm, PizzaForm, SubForm, PastaForm, SaladForm, DinnerPlatterForm, OrderForm
 from django.contrib.auth import login, authenticate, logout
@@ -13,15 +13,12 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from decimal import *
+import json
 
 # Create your views here.
 
 
 def index(request):
-    # print(f"Request:{dir(request)}")
-    # print(f"Request method = {request.method}")
-    # print(f"{request.session.keys()}")
-    # return HttpResponse("Project 3")
     cat_pks = [1, 2, 8, 3, 4, 5, 6]
     categories_dict = Category.objects.in_bulk(cat_pks)
     categories = [categories_dict[pk] for pk in cat_pks]
@@ -49,18 +46,13 @@ def index(request):
     salad_form = SaladForm()
     dinner_platter_form = DinnerPlatterForm()
     context = {
-        # "categories": cat_products,
         "pizza_form": pizza_form,
         "sub_form": sub_form,
         "pasta_form": pasta_form,
         "salad_form": salad_form,
         "dinner_platter_form": dinner_platter_form,
-        # "cart_items": request.session.get('cart_items')
-        # "pizzas": Pizza.objects.all(),
         "cats": categories
     }
-    if request.session.get('cart_items'):
-        print(f"Session data for shopping cart = {request.session['cart_items']}, expire at {request.session.get_expiry_date()}")
     return render(request, "orders/menu.html", context)
 
 
@@ -86,6 +78,13 @@ def login_view(request):
         if user is not None:
             # TODO: Load shopping cart from db to session!
             login(request, user)
+            if UserSession.objects.filter(user=request.user).exists():
+                user_session = json.loads(UserSession.objects.get(user=request.user).session_cart_data)
+                if user_session:
+                    request.session['cart_items'] = user_session
+                    cart_total = sum([Decimal(item['total']) for item in request.session['cart_items']])
+                    request.session['cart_total'] = str(cart_total)
+                    request.session.modified = True
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "orders/login.html", {"message": "Invalid credentials."})
@@ -95,6 +94,15 @@ def login_view(request):
 
 def logout_view(request):
     # TODO: Save shopping cart from session to db!
+    if 'cart_items' in request.session.keys():
+        if UserSession.objects.filter(user=request.user).exists():
+            user_session_data = UserSession.objects.get(user=request.user)
+            user_session_data.session_cart_data = json.dumps(request.session['cart_items'])
+            user_session_data.save()
+        else:
+            user_session_data = UserSession(user=request.user,
+                                            session_cart_data=json.dumps(request.session['cart_items']))
+            user_session_data.save()
     logout(request)
     return redirect('index')
 
@@ -113,7 +121,6 @@ def collect_pizza(request):
                 toppings_num=toppings_num
             )
             price = search_pizza.small_price if int(form.cleaned_data.get('size')) == 1 else search_pizza.large_price
-            # TODO: додавати id
             item_to_cart = {'product_id': search_pizza.id,
                             'name': search_pizza.category.name,
                             'category': search_pizza.category.id,
@@ -134,17 +141,13 @@ def collect_sub(request):
     if request.method == "POST":
         form = SubForm(request.POST)
         if form.is_valid():
-            print(f"collect_sub POST = {form.cleaned_data}")
-            print(f"collect_sub name = {form.cleaned_data.get('name')}")
             sub = form.cleaned_data.get('name')
             price = sub.small_price if int(form.cleaned_data.get('size')) == 1 else sub.large_price
-            print(f"Price = {price}")
             if form.cleaned_data.get('extra_cheese'):
                 price += Decimal(0.50)
             if form.cleaned_data.get('addition'):
                 for addition in form.cleaned_data.get('addition'):
                     price += addition.price
-            print(f"Price = {price}")
             item_to_cart = {'product_id': sub.id,
                             'category': sub.category.id,
                             'name': sub.name,
@@ -155,7 +158,6 @@ def collect_sub(request):
                             'quantity': form.cleaned_data.get('quantity'),
                             'total': str(price * int(form.cleaned_data.get('quantity')))}
             add_to_cart(request, item_to_cart)
-            # print(f"Item to cart = {item_to_cart}")
     return HttpResponseRedirect(reverse("index"))
 
 
@@ -208,7 +210,6 @@ def collect_dinner_platter(request):
                             'quantity': form.cleaned_data.get('quantity'),
                             'total': str(price * int(form.cleaned_data.get('quantity')))}
             add_to_cart(request, item_to_cart)
-            # print(f"Item to cart = {item_to_cart}")
     return HttpResponseRedirect(reverse("index"))
 
 
@@ -226,7 +227,6 @@ def add_to_cart(request, item_to_cart):
     cart_total = sum([Decimal(item['total']) for item in cart_items])
     request.session['cart_total'] = str(cart_total)
     request.session.modified = True
-    print(f"item added = {item_to_cart}")
 
 
 @login_required(login_url='/login/')
@@ -249,18 +249,14 @@ def search_in_list_of_dicts(search_list, key, value):
 @login_required(login_url='/login/')
 def submit_order(request):
     if request.user.is_authenticated:
-        print(f"User = {request.user.username}")
         if "cart_items" in request.session.keys() and len(request.session['cart_items']) > 0:
             # ------------------   Create order   ------------------
             order = Order(created_by=request.user, total=0)
             order.save()
-            print(f"Order created by {order.created_by}, created on {order.created_on}, done status = {order.done}")
             # ------------------   create order items   ----------------------
-            print(f"Items number = {len(request.session['cart_items'])}")
             order_total = 0
             for item in request.session['cart_items']:
                 for i in range(item['quantity']):
-                    print(f"order request cart item = {item}")
                     product_cat = Category.objects.get(id__exact=item['category'])
                     # print(f"item category = {product_cat}")
                     if "Pizza" in product_cat.name:
@@ -307,8 +303,6 @@ def submit_order(request):
                         price = product.small_price if size == 1 else product.large_price
                         order_item = OrderItem(order=order, category=product_cat, name=order_item_name, price=price)
 
-                    print(f"Order item name = {order_item_name}, price = {price}")
-                    print(f"Order item object = {order_item}")
                     order_item.save()
                     order_total += price
             order.total = order_total
@@ -353,5 +347,4 @@ def order_done(request):
             order.done = True
             order.save()
             # order = None
-            print(f"Order Done order = {order}, order id = {int(form.data['order_id'])}, done = {form.cleaned_data.get('done')}")
     return redirect("orders")

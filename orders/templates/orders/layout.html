@@ -18,6 +18,7 @@
     {# Display django.contrib.messages as Bootstrap alerts #}
     {% bootstrap_messages %}
     <link rel="stylesheet" type="text/css" href="{% static 'orders/style.css' %}">
+    <script src="{% static 'orders/script.js' %}"></script>
 </head>
 <body>
 
@@ -36,6 +37,7 @@
                 <li class="nav-item {% if "order" in request.path %} active {% endif %}">
                     <a class="nav-link" href="{% url 'orders' %}">Orders</a>
                 </li>
+                <li class="nav-item nav-link">Cart items: {{ request.session.cart_items|length }}</li>
             {% endif %}
             {#            <li class="nav-item">#}
             {#                <a class="nav-link disabled" href="#">{{ request.path }}</a>#}

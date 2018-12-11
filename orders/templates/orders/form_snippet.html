@@ -1,6 +1,15 @@
-{% for field in form %}
-    <div class="fieldWrapper">
-        {{ field.errors }}
-        {{ field.label_tag }} {{ field }}
-    </div>
-{% endfor %}
+{#{% for field in form %}#}
+{#    <div class="fieldWrapper">#}
+{#        {{ field.errors }}#}
+{#        {{ field.label_tag }} {{ field }}#}
+{#    </div>#}
+{#{% endfor %}#}
+
+{% load bootstrap4 %}
+
+{% bootstrap_form form %}
+{% buttons %}
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+{% endbuttons %}

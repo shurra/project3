@@ -1,4 +1,3 @@
-# from djmoney.models.fields import MoneyField
 from django.db import models
 from django.contrib.auth.models import User
 # from rest_framework import serializers
@@ -31,12 +30,6 @@ class DualPriceProduct(models.Model):
     name = models.CharField(max_length=64)
     small_price = models.DecimalField(max_digits=6, decimal_places=2)
     large_price = models.DecimalField(max_digits=6, decimal_places=2)
-    # large_price = MoneyField(
-    #     decimal_places=2,
-    #     default=0,
-    #     default_currency='USD',
-    #     max_digits=11,
-    # )
 
     def __str__(self):
         return f"{self.name}"
@@ -74,12 +67,6 @@ class DinnerPlatter(DualPriceProduct):
 class SinglePriceProduct(models.Model):
     name = models.CharField(max_length=64)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    # price = MoneyField(
-    #     decimal_places=2,
-    #     default=0,
-    #     default_currency='USD',
-    #     max_digits=11,
-    # )
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __str__(self):
@@ -124,16 +111,9 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-    # pizza_toppings = models.ManyToManyField(PizzaTopping)
-    # subs_additions = models.ManyToManyField(SubsAddition)
-
-    # dish = models.ForeignKey(category.name, on_delete=models.DO_NOTHING)
-
-    # content = models.CharField(max_length=1024)
-#     pizza_toppings = models.ManyToManyField(PizzaTopping)
-#     subs_additions = models.ManyToManyField(SubsAddition)
-#     size = models.IntegerField()
-#     price = models.DecimalField(max_digits=6, decimal_places=2)
 
 
+class UserSession(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    session_cart_data = models.TextField()
 

@@ -29,7 +29,7 @@ class PizzaForm(forms.Form):
     SIZES = (('1', 'Small'),
              ('2', 'Large'),
              )
-    size = forms.ChoiceField(required=True, choices=SIZES, )
+    size = forms.ChoiceField(required=True, choices=SIZES)
     pizza_toppings = PizzaTopping.objects.all()
     toppings = forms.ModelMultipleChoiceField(queryset=pizza_toppings,
                                               required=False,
@@ -46,7 +46,7 @@ class PizzaForm(forms.Form):
 
 class SubForm(forms.Form):
     subs = Sub.objects.all()
-    name = forms.ModelChoiceField(queryset=subs, required=True)
+    name = forms.ModelChoiceField(queryset=subs, required=True, empty_label="Select sub")
     SIZES = (('1', 'Small'),
              ('2', 'Large'),
              )
@@ -62,21 +62,21 @@ class SubForm(forms.Form):
 
 class PastaForm(forms.Form):
     pastas = Pasta.objects.all()
-    name = forms.ModelChoiceField(queryset=pastas, required=True)
+    name = forms.ModelChoiceField(queryset=pastas, required=True, empty_label="Select pasta")
     quantity = forms.IntegerField(required=True, initial=1, min_value=1, max_value=10)
     prefix = "pasta"
 
 
 class SaladForm(forms.Form):
     salads = Salad.objects.all()
-    name = forms.ModelChoiceField(queryset=salads, required=True)
+    name = forms.ModelChoiceField(queryset=salads, required=True, empty_label="Select salad")
     quantity = forms.IntegerField(required=True, initial=1, min_value=1, max_value=10)
     prefix = "salad"
 
 
 class DinnerPlatterForm(forms.Form):
     dinner_platter = DinnerPlatter.objects.all()
-    name = forms.ModelChoiceField(queryset=dinner_platter, required=True)
+    name = forms.ModelChoiceField(queryset=dinner_platter, required=True, empty_label="Select platter")
     SIZES = (('1', 'Small'),
              ('2', 'Large'),
              )
@@ -91,4 +91,3 @@ class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = ['done']
-

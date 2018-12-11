@@ -15,3 +15,7 @@ footer {
 /*footer span {*/
   /*color: white;*/
 /*}*/
+
+.close {
+  float: right;
+}
