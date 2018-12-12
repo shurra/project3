@@ -69,11 +69,15 @@ class OrderInline(admin.TabularInline):
 
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderInline]
+    list_display = ["created_on", "created_by", "done", "total"]
+    list_filter = ["created_on", "created_by", "done"]
 
 
 class OrderItemAdmin(admin.ModelAdmin):
-    list_editable = []
-    readonly_fields = []
+    list_display = ["name", "category", "price", "order"]
+    # list_editable = ["category"]
+    readonly_fields = ["category", "name", "price", "order"]
+    list_filter = ["category"]
 
 
 # Register your models here.

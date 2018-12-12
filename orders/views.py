@@ -76,14 +76,16 @@ def login_view(request):
         password = request.POST.get("password")
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            # TODO: Load shopping cart from db to session!
             login(request, user)
             if UserSession.objects.filter(user=request.user).exists():
                 user_session = json.loads(UserSession.objects.get(user=request.user).session_cart_data)
                 if user_session:
-                    request.session['cart_items'] = user_session
-                    cart_total = sum([Decimal(item['total']) for item in request.session['cart_items']])
-                    request.session['cart_total'] = str(cart_total)
+                    # print(f"Login: user_session = {user_session['cart']['cart_items']}")
+                    request.session['cart_items'] = user_session['cart']['cart_items']
+                    request.session['cart_total'] = user_session['cart']['cart_total']
+                    # request.session['cart_items'] = user_session
+                    # cart_total = sum([Decimal(item['total']) for item in request.session['cart_items']])
+                    # request.session['cart_total'] = str(cart_total)
                     request.session.modified = True
             return HttpResponseRedirect(reverse("index"))
         else:
@@ -93,16 +95,18 @@ def login_view(request):
 
 
 def logout_view(request):
-    # TODO: Save shopping cart from session to db!
     if 'cart_items' in request.session.keys():
-        if UserSession.objects.filter(user=request.user).exists():
-            user_session_data = UserSession.objects.get(user=request.user)
-            user_session_data.session_cart_data = json.dumps(request.session['cart_items'])
-            user_session_data.save()
-        else:
-            user_session_data = UserSession(user=request.user,
-                                            session_cart_data=json.dumps(request.session['cart_items']))
-            user_session_data.save()
+        user_session_data, created = UserSession.objects.update_or_create(
+            user=request.user,
+            defaults={
+                'session_cart_data': json.dumps({
+                    'cart': {
+                        'cart_items': request.session['cart_items'],
+                        'cart_total': request.session['cart_total']
+                    }
+                })
+            }
+        )
     logout(request)
     return redirect('index')
 
@@ -116,7 +120,6 @@ def collect_pizza(request):
             if toppings_num == 4:
                 toppings_num = 5
             search_pizza = Pizza.objects.get(
-                # category__name=Category.objects.get(name=form.cleaned_data.get('field_category')).name,
                 category=form.cleaned_data.get('field_category'),
                 toppings_num=toppings_num
             )

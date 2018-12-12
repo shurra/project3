@@ -16,7 +16,6 @@
                     {% csrf_token %}
                     {% include "orders/form_snippet.html" with form=form %}
                     <input type="hidden" name="order_id" value="{{ order.id }}">
-                    <input type="submit" value="Submit">
                 </form>
             {% endif %}
         </div>
