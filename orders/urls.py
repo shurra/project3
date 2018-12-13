@@ -1,5 +1,6 @@
 from django.urls import path, re_path, include
 from django.views.generic import TemplateView
+from django.contrib.auth import views as auth_views
 
 from . import views
 from orders.views import OrdersList, OrderDetail
@@ -19,7 +20,7 @@ urlpatterns = [
     path('submit_order/', views.submit_order, name="submit_order"),
     path('orders/', OrdersList.as_view(), name="orders"),
     path('order/<int:pk>/', OrderDetail.as_view(), name="order-detail"),
-    path('order-done/', views.order_done, name="order-done")
-    # path('order/(?P<pk>\d+)$', OrderDetail.as_view(), name="order-detail")
+    path('order-done/', views.order_done, name="order-done"),
+    # path('change-password/', auth_views.PasswordChangeView.as_view(template_name='orders/change-password.html')),
     # path('accounts/', include('django.contrib.auth.urls')),
 ]

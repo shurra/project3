@@ -71,13 +71,16 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderInline]
     list_display = ["created_on", "created_by", "done", "total"]
     list_filter = ["created_on", "created_by", "done"]
+    actions_on_bottom = True
 
 
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ["name", "category", "price", "order"]
     # list_editable = ["category"]
     readonly_fields = ["category", "name", "price", "order"]
-    list_filter = ["category"]
+    list_filter = ["category", "order__created_on"]
+    date_hierarchy = 'order__created_on'
+    search_fields = ['name', 'order__created_on']
 
 
 # Register your models here.
