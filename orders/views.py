@@ -6,10 +6,11 @@ from django.views.generic.detail import SingleObjectMixin
 from .models import Category, PizzaTopping, Pizza, Sub, Pasta, Salad, DinnerPlatter, Order, OrderItem, SubsAddition, UserSession
 
 from .forms import RegisterForm, PizzaForm, SubForm, PastaForm, SaladForm, DinnerPlatterForm, OrderForm
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from decimal import *
@@ -351,3 +352,20 @@ def order_done(request):
             order.save()
             # order = None
     return redirect("orders")
+
+
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('change_password')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'orders/change-password.html', {
+        'form': form
+    })

@@ -22,5 +22,6 @@ urlpatterns = [
     path('order/<int:pk>/', OrderDetail.as_view(), name="order-detail"),
     path('order-done/', views.order_done, name="order-done"),
     # path('change-password/', auth_views.PasswordChangeView.as_view(template_name='orders/change-password.html')),
+    path('change-password/', views.change_password, name='change_password')
     # path('accounts/', include('django.contrib.auth.urls')),
 ]
