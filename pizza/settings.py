@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 import django_heroku
 import dj_database_url
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -88,17 +89,6 @@ DATABASES = {
 }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'de4tpgus0vg50d',
-#         'USER': 'qteosvrwtonmyb',
-#         'PASSWORD': '9ffcb421adf0b96f8f88a4601d46393d9d55bbb7bd3bc7bc1dade83ba5216d40',
-#         'HOST': 'ec2-54-247-74-131.eu-west-1.compute.amazonaws.com',
-#         'PORT': '5432',
-#     }
-# }
-
 # Heroku: Update database configuration from $DATABASE_URL.
 
 db_from_env = dj_database_url.config(conn_max_age=500)
@@ -143,8 +133,17 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+# EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+# EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your_email@example.com')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
+# EMAIL_SUBJECT_PREFIX = '[%s] ' % SITE_NAME
+EMAIL_USE_TLS = True
+SERVER_EMAIL = EMAIL_HOST_USER
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
