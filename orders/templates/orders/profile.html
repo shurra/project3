@@ -8,16 +8,18 @@
     <h1>Hello, {{ user.first_name }}</h1>
     <ul>
         <li>Full name: {{ user.get_full_name }}</li>
-        <li>email: {{ user.email }}</li>
+        {#        <li>email: {{ user.email }}</li>#}
         <li>Currently logged in as: {{ user.username }}</li>
         <li>Last login: {{ user.last_login }}</li>
         <li>Registered: {{ user.date_joined }}</li>
-        <hr>
-        <a href="{% url 'change_password' %}"><button class="btn btn-danger">Change Password</button></a>
-        <a href="{% url 'logout' %}"><button class="btn btn-primary">Logout</button></a>
     </ul>
     <form method="post">
-    {% csrf_token %}
+        {% csrf_token %}
         {% include "orders/form_snippet.html" with form=form %}
     </form>
+    <hr>
+    <a href="{% url 'change_password' %}"><button class="btn btn-danger">Change Password</button></a>
+    <a href="{% url 'logout' %}"><button class="btn btn-primary">Logout</button></a>
+
+
 {% endblock %}

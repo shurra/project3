@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, ReadOnlyPasswordHashField
 from .models import User, Category, PizzaTopping, SubsAddition, Sub, Pasta, Salad, DinnerPlatter, Order
 
 
@@ -91,6 +91,7 @@ class OrderForm(forms.ModelForm):
 
 class ProfileForm(UserChangeForm):
     # password = None
+    password = ReadOnlyPasswordHashField(label="Password", widget=forms.HiddenInput(),)
 
     class Meta:
         model = User
@@ -98,8 +99,9 @@ class ProfileForm(UserChangeForm):
             'first_name',
             'last_name',
             'email',
+            'password',
         )
-        exclude = ('password',)
+        # exclude = ('password',)
 
 
 # class ProfileForm(forms.ModelForm):
