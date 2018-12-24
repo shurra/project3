@@ -3,3 +3,4 @@ django-bootstrap4
 gunicorn
 django-debug-toolbar==1.10.1
 django-heroku
+dj_database_url
