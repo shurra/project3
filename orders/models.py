@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+User._meta.get_field('email')._unique = True
+
 
 class Category(models.Model):
     name = models.CharField(max_length=64)
@@ -103,8 +105,8 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.DO_NOTHING)
-    category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=500)
     # size = models.IntegerField(blank=True, null=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)

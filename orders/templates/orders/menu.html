@@ -14,10 +14,16 @@
                 <div class="mb-5"><h2 class="text-center">{{ cat.name }}</h2>
                     {% if "Pizza" in cat.name %}
                         <table class="table-striped table-bordered table-hover table-condensed col-sm-12">
-                            <tr><th class="text-center"></th><th class="text-center">Small</th><th class="text-center">Large</th></tr>
+                            <tr>
+                                <th class="text-center"></th>
+                                <th class="text-center">Small</th>
+                                <th class="text-center">Large</th>
+                            </tr>
                             {% for pizza in cat.pizzas.all %}
                                 <tr>
-                                    <td class="text-center">{{ pizza.get_toppings_num_display }}</td><td class="text-center">{{ pizza.small_price }}</td><td class="text-center">{{ pizza.large_price }}</td>
+                                    <td class="text-center">{{ pizza.get_toppings_num_display }}</td>
+                                    <td class="text-center">{{ pizza.small_price }}</td>
+                                    <td class="text-center">{{ pizza.large_price }}</td>
                                 </tr>
                             {% endfor %}
                         </table>

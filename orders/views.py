@@ -1,13 +1,14 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
-from django.views.generic.detail import SingleObjectMixin
 
-from .models import Category, PizzaTopping, Pizza, Sub, Pasta, Salad, DinnerPlatter, Order, OrderItem, SubsAddition, UserSession
+from .models import Category, PizzaTopping, Pizza, Sub, Pasta, Salad, DinnerPlatter, Order, OrderItem, SubsAddition, \
+    UserSession
+from .helpers import search_in_list_of_dicts
 
-from .forms import RegisterForm, PizzaForm, SubForm, PastaForm, SaladForm, DinnerPlatterForm, OrderForm
+from .forms import RegisterForm, PizzaForm, SubForm, PastaForm, SaladForm, DinnerPlatterForm, OrderForm, ProfileForm
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -58,10 +59,13 @@ def index(request):
 
 
 def register_view(request):
+    """
+    Users registration view
+    """
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            form.save()
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=form.cleaned_data.get('username'), password=raw_password)
             login(request, user)
@@ -72,6 +76,9 @@ def register_view(request):
 
 
 def login_view(request):
+    """
+    Users login view. Loads shopping cart data from DB to session.
+    """
     if request.method == 'POST':
         username = request.POST.get("username")
         password = request.POST.get("password")
@@ -96,8 +103,12 @@ def login_view(request):
 
 
 def logout_view(request):
+    """
+    Users logout view. Saves shopping cart data from session to DB.
+    """
     if 'cart_items' in request.session.keys():
-        user_session_data, created = UserSession.objects.update_or_create(
+        # user_session_data, created = UserSession.objects.update_or_create(
+        UserSession.objects.update_or_create(
             user=request.user,
             defaults={
                 'session_cart_data': json.dumps({
@@ -114,6 +125,9 @@ def logout_view(request):
 
 @login_required(login_url='/login/')
 def collect_pizza(request):
+    """
+    Pizza form view. Search pizza and add to shopping cart.
+    """
     if request.method == "POST":
         form = PizzaForm(request.POST)
         if form.is_valid():
@@ -142,6 +156,9 @@ def collect_pizza(request):
 
 @login_required(login_url='/login/')
 def collect_sub(request):
+    """
+    Sub form view. Search sub and add to shopping cart.
+    """
     if request.method == "POST":
         form = SubForm(request.POST)
         if form.is_valid():
@@ -167,6 +184,9 @@ def collect_sub(request):
 
 @login_required(login_url='/login/')
 def collect_pasta(request):
+    """
+    Pasta form view. Search pasta and add to shopping cart.
+    """
     if request.method == "POST":
         form = PastaForm(request.POST)
         if form.is_valid():
@@ -184,6 +204,9 @@ def collect_pasta(request):
 
 @login_required(login_url='/login/')
 def collect_salad(request):
+    """
+    Salad form view. Search salad and add to shopping cart.
+    """
     if request.method == "POST":
         form = SaladForm(request.POST)
         if form.is_valid():
@@ -201,11 +224,16 @@ def collect_salad(request):
 
 @login_required(login_url='/login/')
 def collect_dinner_platter(request):
+    """
+    Dinner platter form view. Search dinner platter and add to shopping cart.
+    """
     if request.method == "POST":
         form = DinnerPlatterForm(request.POST)
         if form.is_valid():
             dinner_platter = form.cleaned_data.get('name')
-            price = dinner_platter.small_price if int(form.cleaned_data.get('size')) == 1 else dinner_platter.large_price
+            price = dinner_platter.small_price \
+                if int(form.cleaned_data.get('size')) == 1 \
+                else dinner_platter.large_price
             item_to_cart = {'product_id': dinner_platter.id,
                             'category': dinner_platter.category.id,
                             'name': dinner_platter.name,
@@ -219,6 +247,9 @@ def collect_dinner_platter(request):
 
 @login_required(login_url='/login/')
 def add_to_cart(request, item_to_cart):
+    """
+    Add to cart function - save item data to shopping cart in session
+    """
     if not request.session.get('cart_items'):
         cart_items = []
         item_id = 1
@@ -235,6 +266,9 @@ def add_to_cart(request, item_to_cart):
 
 @login_required(login_url='/login/')
 def remove_from_card(request):
+    """
+    Remove item from cart in session.
+    """
     request.session['cart_items'].remove(search_in_list_of_dicts(request.session['cart_items'],
                                                                  "cart_item_id",
                                                                  int(request.GET.get('cart_item_id'))))
@@ -244,14 +278,11 @@ def remove_from_card(request):
     return redirect('index')
 
 
-def search_in_list_of_dicts(search_list, key, value):
-    for item in search_list:
-        if item[key] == value:
-            return item
-
-
 @login_required(login_url='/login/')
 def submit_order(request):
+    """
+    Create order view. Parse shopping cart from session data, save cart items and order.
+    """
     if request.user.is_authenticated:
         if "cart_items" in request.session.keys() and len(request.session['cart_items']) > 0:
             # ------------------   Create order   ------------------
@@ -317,6 +348,9 @@ def submit_order(request):
 
 
 class OrdersList(LoginRequiredMixin, ListView):
+    """
+    Orders list
+    """
     login_url = '/login/'
 
     context_object_name = "user_orders"
@@ -329,6 +363,9 @@ class OrdersList(LoginRequiredMixin, ListView):
 
 
 class OrderDetail(LoginRequiredMixin, DetailView):
+    """
+    Order detail
+    """
     login_url = '/login/'
     context_object_name = 'order'
 
@@ -343,17 +380,19 @@ class OrderDetail(LoginRequiredMixin, DetailView):
 
 @login_required(login_url='/login/')
 def order_done(request):
+    """
+    Order done function for 'Is_staff' users
+    """
     if request.method == "POST":
         form = OrderForm(request.POST)
         if form.is_valid():
-            # order = Order.objects.get(pk=id)
             order = get_object_or_404(Order, pk=int(form.data['order_id']))
             order.done = True
             order.save()
-            # order = None
     return redirect("orders")
 
 
+@login_required(login_url='/login/')
 def change_password(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
@@ -361,11 +400,27 @@ def change_password(request):
             user = form.save()
             update_session_auth_hash(request, user)  # Important!
             messages.success(request, 'Your password was successfully updated!')
-            return redirect('change_password')
         else:
             messages.error(request, 'Please correct the error below.')
+        return redirect('profile')
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'orders/change-password.html', {
         'form': form
     })
+
+
+@login_required(login_url='/login/')
+def profile(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+        else:
+            messages.error(request, 'Please correct the error below.')
+        return redirect('profile')
+    else:
+        form = ProfileForm(instance=request.user)
+        return render(request, 'orders/profile.html', {
+            'form': form
+        })

@@ -8,15 +8,16 @@
     <h2>Register</h2>
     <form method="post">
         {% csrf_token %}
-        {% for field in form %}
-            <div>
-                {{ field.label_tag }}<br>
-                {{ field }}
-                {% for error in field.errors %}
-                    <p style="color: red">{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endfor %}
-        <button type="submit">Register</button>
+{#        {% for field in form %}#}
+{#            <div>#}
+{#                {{ field.label_tag }}<br>#}
+{#                {{ field }}#}
+{#                {% for error in field.errors %}#}
+{#                    <p style="color: red">{{ error }}</p>#}
+{#                {% endfor %}#}
+{#            </div>#}
+{#        {% endfor %}#}
+        {% include "orders/form_snippet.html" with form=form %}
+{#        <button type="submit">Register</button>#}
     </form>
 {% endblock %}

@@ -16,4 +16,8 @@
         <a href="{% url 'change_password' %}"><button class="btn btn-danger">Change Password</button></a>
         <a href="{% url 'logout' %}"><button class="btn btn-primary">Logout</button></a>
     </ul>
+    <form method="post">
+    {% csrf_token %}
+        {% include "orders/form_snippet.html" with form=form %}
+    </form>
 {% endblock %}
