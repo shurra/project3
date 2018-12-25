@@ -1,5 +1,9 @@
 {% extends "orders/layout.html" %}
 
+{% block extra_head_tags %}
+    <meta http-equiv="refresh" content="30" />
+{% endblock %}
+
 {% block title %}
     Pizza: Orders
 {% endblock %}
@@ -16,7 +20,7 @@
                             Ordered on: {{ order.created_on|time:"H:i" }} {{ order.created_on|date:"D d M Y" }}. Price: {{ order.total }}<br>
 
                         </a>
-                    User: {% firstof order.created_by.get_full_name order.created_by.username %}. Email: {{ order.created_by.email }}
+                        User: {% firstof order.created_by.get_full_name order.created_by.username %}. Email: {{ order.created_by.email }}
                     </li>
                 {% endfor %}
             {% else %}
