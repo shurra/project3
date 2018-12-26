@@ -61,7 +61,6 @@ ROOT_URLCONF = 'pizza.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # TODO: custom templates
         'DIRS': ['orders/templates/'],
         'APP_DIRS': True,
         'OPTIONS': {

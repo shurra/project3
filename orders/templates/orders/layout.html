@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block extra_head_tags %}{% endblock %}
     <title>{% block title %} {% endblock %}</title>
-    <!-- Latest compiled and minified CSS -->
-    {#    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">#}
     {% load static %}
     {# Load the tag library #}
     {% load bootstrap4 %}
@@ -40,17 +38,6 @@
                 </li>
                 <li class="nav-item nav-link">Cart items: {{ request.session.cart_items|length }}</li>
             {% endif %}
-            {#            <li class="nav-item">#}
-            {#                <a class="nav-link disabled" href="#">{{ request.path }}</a>#}
-            {#            </li>#}
-            {#            <li class="nav-item dropdown">#}
-            {#                <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>#}
-            {#                <div class="dropdown-menu" aria-labelledby="dropdown04">#}
-            {#                    <a class="dropdown-item" href="#">Action</a>#}
-            {#                    <a class="dropdown-item" href="#">Another action</a>#}
-            {#                    <a class="dropdown-item" href="#">Something else here</a>#}
-            {#                </div>#}
-            {#            </li>#}
         </ul>
         {% if not user.is_authenticated %}
             <form class="form-inline" action="{% url 'login' %}" method="post">

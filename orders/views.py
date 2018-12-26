@@ -4,7 +4,7 @@ from django.views.generic import ListView, DetailView
 
 from .models import Category, PizzaTopping, Pizza, Sub, Pasta, Salad, DinnerPlatter, Order, OrderItem, SubsAddition, \
     UserSession
-from .helpers import search_in_list_of_dicts
+from .helpers import add_to_cart
 
 from .forms import RegisterForm, PizzaForm, SubForm, PastaForm, SaladForm, DinnerPlatterForm, OrderForm, ProfileForm
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
@@ -29,7 +29,6 @@ def index(request):
     for c in categories:
         if c.name.find("Pizza"):
             products = Pizza.objects.filter(category__name=c.name)
-            # cat_products.append({"name": c.name, "products": products})
         if c.name == "Toppings":
             products = PizzaTopping.objects.filter(category__name=c.name)
         if c.name == "Subs":
@@ -88,12 +87,8 @@ def login_view(request):
             if UserSession.objects.filter(user=request.user).exists():
                 user_session = json.loads(UserSession.objects.get(user=request.user).session_cart_data)
                 if user_session:
-                    # print(f"Login: user_session = {user_session['cart']['cart_items']}")
                     request.session['cart_items'] = user_session['cart']['cart_items']
                     request.session['cart_total'] = user_session['cart']['cart_total']
-                    # request.session['cart_items'] = user_session
-                    # cart_total = sum([Decimal(item['total']) for item in request.session['cart_items']])
-                    # request.session['cart_total'] = str(cart_total)
                     request.session.modified = True
             return HttpResponseRedirect(reverse("index"))
         else:
@@ -107,7 +102,6 @@ def logout_view(request):
     Users logout view. Saves shopping cart data from session to DB.
     """
     if 'cart_items' in request.session.keys():
-        # user_session_data, created = UserSession.objects.update_or_create(
         UserSession.objects.update_or_create(
             user=request.user,
             defaults={
@@ -148,9 +142,6 @@ def collect_pizza(request):
                             'quantity': form.cleaned_data.get('quantity'),
                             'total': str(price * int(form.cleaned_data.get('quantity')))}
             add_to_cart(request, item_to_cart)
-    else:
-        form = PizzaForm()
-        return render(request, "orders/pizza-form.html", {'form': form})
     return HttpResponseRedirect(reverse("index"))
 
 
@@ -246,39 +237,6 @@ def collect_dinner_platter(request):
 
 
 @login_required(login_url='/login/')
-def add_to_cart(request, item_to_cart):
-    """
-    Add to cart function - save item data to shopping cart in session
-    """
-    if not request.session.get('cart_items'):
-        cart_items = []
-        item_id = 1
-    else:
-        cart_items = request.session.get('cart_items')
-        item_id = max([item['cart_item_id'] for item in request.session.get('cart_items')]) + 1
-    item_to_cart['cart_item_id'] = item_id
-    cart_items.append(item_to_cart)
-    request.session['cart_items'] = cart_items
-    cart_total = sum([Decimal(item['total']) for item in cart_items])
-    request.session['cart_total'] = str(cart_total)
-    request.session.modified = True
-
-
-@login_required(login_url='/login/')
-def remove_from_card(request):
-    """
-    Remove item from cart in session.
-    """
-    request.session['cart_items'].remove(search_in_list_of_dicts(request.session['cart_items'],
-                                                                 "cart_item_id",
-                                                                 int(request.GET.get('cart_item_id'))))
-    cart_total = sum([Decimal(item['total']) for item in request.session['cart_items']])
-    request.session['cart_total'] = str(cart_total)
-    request.session.modified = True
-    return redirect('index')
-
-
-@login_required(login_url='/login/')
 def submit_order(request):
     """
     Create order view. Parse shopping cart from session data, save cart items and order.
@@ -352,7 +310,6 @@ class OrdersList(LoginRequiredMixin, ListView):
     Orders list
     """
     login_url = '/login/'
-
     context_object_name = "user_orders"
 
     def get_queryset(self):
