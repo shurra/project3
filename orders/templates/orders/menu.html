@@ -1,4 +1,8 @@
 {% extends "orders/layout.html" %}
+{% block extra_head_tags %}
+    {% load static %}
+    <script src="{% static 'orders/script.js' %}"></script>
+{% endblock %}
 {% load bootstrap4 %}
 
 {% block title %}

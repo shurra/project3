@@ -36,15 +36,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
-
-// $(document).ready(function () {
-//     $("input[name='pizza-toppings']").change(function () {
-//         var maxAllowed = 5;
-//         var cnt = $("input[name='pizza-toppings']:checked").length;
-//         if (cnt > maxAllowed)
-//         {
-//             $(this).prop("checked", "");
-//             alert('Select maximum ' + maxAllowed + ' toppings!');
-//         }
-//     });
-// });
